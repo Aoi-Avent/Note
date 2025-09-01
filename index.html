@@ -83,9 +83,9 @@
             // タイトル表示が終わったらさらに1秒待って本文表示
             setTimeout(() => {
               showTextOneByOne(fullText);
-            }, 2000);
+            }, 1300);
           });
-        }, 1300);
+        }, 2200);
 
       } catch (e) {
         display.textContent = 'データの取得に失敗しました。';
@@ -137,11 +137,11 @@
         if (char === '\n') {
           delay = 800; // 改行のスクロールが落ち着くまで100ms追加
         } else if (char === '。') {
-          delay = 1000; // 句点
+          delay = 800; // 句点
         } else if (char === '、') {
-          delay = 600; // 読点
+          delay = 500; // 読点
         } else if (char === '」') {
-          delay = 600; // 読点
+          delay = 400; // 読点
         } else if (char === '？') {
           delay = 600; // 読点
         } else if (char === '　') {
