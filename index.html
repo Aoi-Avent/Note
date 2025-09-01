@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<title>小論</title>
+<style>
+  #display {
+  font-size: 1.4em;
+  line-height: 3.2em;
+  font-family: 'Hiragino Mincho Pro', 'ヒラギノ明朝 Pro', 'Times New Roman', serif;
+  white-space: pre-wrap;
+  border: none;
+  padding: 1em 2em;
+  width: 70%;
+  margin: 2em auto;
+  min-height: 120px;
+
+  max-height: 80vh;   /* 画面いっぱいまで表示領域を確保 */
+  overflow-y: auto;   /* スクロール可能に */
+  color: #111;
+
+  scroll-behavior: smooth;  /* スクロールをなめらかに */
+}
+
+h1 {
+  font-family: 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W6', 'Yu Gothic', '游ゴシック', sans-serif;
+  font-size: 1.8em;
+  font-weight: bold;
+  color: #111;
+  text-align: left;        /* 左揃え */
+  width: 70%;              /* 本文と同じ幅 */
+  margin: 1em auto 0 auto; /* 本文に合わせて中央寄せ */
+  padding: 0 2em;          /* 本文と揃える */
+}
+
+
+
+</style>
+</head>
+<body>
+  <h1>小論</h1>
+  <div id="display"></div>
+
+  <script>
+    const spreadsheetId = '1KFKX72CwcWavjCvGxCTt_XA3iQQAyz6a3Koc7qBQ5PQ'; // 葵さんのスプレッドシートID
+    const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json`;
+
+    const display = document.getElementById('display');
+
+    async function fetchData() {
+      try {
+        const res = await fetch(url);
+        const text = await res.text();
+
+        const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+        const data = JSON.parse(jsonText);
+
+        const rows = data.table.rows;
+
+        // 文章を全部つなげて一つのテキストにする（ここでは3列目に文章がある前提）
+        let fullText = '';
+        rows.forEach(row => {
+          if (row.c[2] && row.c[2].v) {
+            fullText += row.c[2].v + '\n';
+          }
+        });
+
+        showTextOneByOne(fullText);
+
+      } catch (e) {
+        display.textContent = 'データの取得に失敗しました。';
+        console.error(e);
+      }
+    }
+
+    let index = 0;
+    let currentText = '';
+
+    function showTextOneByOne(text) {
+      currentText = text;
+      index = 0;
+      display.textContent = '';
+      showNextChar();
+    }
+
+function showNextChar() {
+  if (index < currentText.length) {
+    const char = currentText.charAt(index);
+    display.textContent += char;
+    index++;
+
+    // 自動スクロール
+    display.scrollTop = display.scrollHeight;
+
+    let delay = 100; // 通常は50ms
+
+    if (char === '\n') {
+      delay = 1300; // 改行
+    } else if (char === '。') {
+      delay = 1000; // 句点
+    } else if (char === '、') {
+      delay = 600; // 読点
+    } else if (char === '」') {
+      delay = 600; // 読点
+    } else if (char === '？') {
+      delay = 600; // 読点
+    }
+
+    setTimeout(showNextChar, delay);
+  }
+}
+
+
+    fetchData();
+  </script>
+</body>
+</html>
