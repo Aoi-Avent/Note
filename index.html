@@ -83,7 +83,7 @@
             // タイトル表示が終わったらさらに1秒待って本文表示
             setTimeout(() => {
               showTextOneByOne(fullText);
-            }, 1500);
+            }, 2000);
           });
         }, 1300);
 
@@ -135,7 +135,7 @@
         let delay = 95;
 
         if (char === '\n') {
-          delay = 800; // 改行
+          delay = 800; // 改行のスクロールが落ち着くまで100ms追加
         } else if (char === '。') {
           delay = 1000; // 句点
         } else if (char === '、') {
