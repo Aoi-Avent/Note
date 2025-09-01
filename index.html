@@ -5,77 +5,94 @@
 <title>water_</title>
 <style>
   #display {
-  font-size: 1.4em;
-  line-height: 3.2em;
-  font-family: 'Hiragino Mincho Pro', 'ヒラギノ明朝 Pro', 'Times New Roman', serif;
-  white-space: pre-wrap;
-  border: none;
-  padding: 1em 2em;
-  width: 70%;
-  margin: 2em auto;
-  min-height: 120px;
+    font-size: 1.4em;
+    line-height: 3.2em;
+    font-family: 'Hiragino Mincho Pro', 'ヒラギノ明朝 Pro', 'Times New Roman', serif;
+    white-space: pre-wrap;
+    border: none;
+    padding: 1em 2em;
+    width: 70%;
+    margin: 2em auto;
+    min-height: 120px;
+    max-height: 80vh;
+    overflow-y: auto;
+    color: #111;
+    scroll-behavior: smooth;
+  }
 
-  max-height: 80vh;   /* 画面いっぱいまで表示領域を確保 */
-  overflow-y: auto;   /* スクロール可能に */
-  color: #111;
-
-  scroll-behavior: smooth;  /* スクロールをなめらかに */
-}
-
-h1 {
-  font-family: 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W6', 'Yu Gothic', '游ゴシック', sans-serif;
-  font-size: 1.8em;
-  font-weight: bold;
-  color: #111;
-  text-align: left;        /* 左揃え */
-  width: 70%;              /* 本文と同じ幅 */
-  margin: 1em auto 0 auto; /* 本文に合わせて中央寄せ */
-  padding: 0 2em;          /* 本文と揃える */
-}
-
-
-
+  h1 {
+    font-family: 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W6', 'Yu Gothic', '游ゴシック', sans-serif;
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #111;
+    text-align: left;
+    width: 70%;
+    margin: 1em auto 0 auto;
+    padding: 0 2em;
+  }
 </style>
 </head>
 <body>
-  <h1>water_</h1>
+  <h1></h1>
   <div id="display"></div>
 
   <script>
-    const spreadsheetId = '1KFKX72CwcWavjCvGxCTt_XA3iQQAyz6a3Koc7qBQ5PQ'; // 葵さんのスプレッドシートID
+    const spreadsheetId = '1KFKX72CwcWavjCvGxCTt_XA3iQQAyz6a3Koc7qBQ5PQ';
     const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json`;
 
     const display = document.getElementById('display');
+    const h1 = document.querySelector('h1');
 
     async function fetchData() {
       try {
         const res = await fetch(url);
         const text = await res.text();
-
         const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
         const data = JSON.parse(jsonText);
-
         const rows = data.table.rows;
 
-        // 文章を全部つなげて一つのテキストにする（ここでは3列目に文章がある前提）
         let fullText = '';
+        let latestTitle = '';
+
         rows.forEach(row => {
-          if (row.c[2] && row.c[2].v) {
-            fullText += row.c[2].v + '\n';
-          }
+          if (row.c[0] && row.c[0].v) latestTitle = row.c[0].v; // 1列目をタイトルに
+          if (row.c[2] && row.c[2].v) fullText += row.c[2].v + '\n'; // 3列目を本文に
         });
 
-        // ここで2秒待ってから表示開始
-    setTimeout(() => {
-      showTextOneByOne(fullText);
-    }, 1000); // 2000ms = 2秒
+        // ページアクセス後1秒待ってタイトル表示スタート
+        setTimeout(() => {
+          showTextOneByOneTitle(latestTitle, () => {
+            // タイトル表示が終わったらさらに1秒待って本文表示
+            setTimeout(() => {
+              showTextOneByOne(fullText);
+            }, 1500);
+          });
+        }, 1300);
 
-  } catch (e) {
-    display.textContent = 'データの取得に失敗しました。';
-    console.error(e);
+      } catch (e) {
+        display.textContent = 'データの取得に失敗しました。';
+        console.error(e);
       }
     }
 
+    // タイトル用一文字ずつ表示
+    function showTextOneByOneTitle(text, callback) {
+      let index = 0;
+      h1.textContent = '';
+
+      function showNextChar() {
+        if (index < text.length) {
+          h1.textContent += text.charAt(index);
+          index++;
+          setTimeout(showNextChar, 130);
+        } else if (callback) {
+          callback();
+        }
+      }
+      showNextChar();
+    }
+
+    // 本文用一文字ずつ表示
     let index = 0;
     let currentText = '';
 
@@ -86,11 +103,11 @@ h1 {
       showNextChar();
     }
 
-function showNextChar() {
-  if (index < currentText.length) {
-    const char = currentText.charAt(index);
-    display.textContent += char;
-    index++;
+    function showNextChar() {
+      if (index < currentText.length) {
+        const char = currentText.charAt(index);
+        display.textContent += char;
+        index++;
 
     // 自動スクロール
     display.scrollTop = display.scrollHeight;
@@ -116,7 +133,6 @@ function showNextChar() {
     setTimeout(showNextChar, delay);
   }
 }
-
 
     fetchData();
   </script>
