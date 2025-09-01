@@ -1,37 +1,47 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-<meta charset="UTF-8" />
-<title>water_</title>
-<style>
-  #display {
-    font-size: 1.4em;
-    line-height: 3.2em;
-    font-family: 'Hiragino Mincho Pro', 'ヒラギノ明朝 Pro', 'Times New Roman', serif;
-    white-space: pre-wrap;
-    border: none;
-    padding: 1em 2em;
-    width: 70%;
-    margin: 2em auto;
-    min-height: 120px;
-    max-height: 80vh;
-    overflow-y: auto;
-    color: #111;
-    scroll-behavior: smooth;
-  }
 
-  h1 {
-    font-family: 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W6', 'Yu Gothic', '游ゴシック', sans-serif;
-    font-size: 2.0em;
-    font-weight: bold;
-    color: #111;
-    text-align: left;
-    width: 70%;
-    margin: 1em auto 0 auto;
-    padding: 0 2em;
-  }
-</style>
+<head>
+  <meta charset="UTF-8" />
+  <title>water_</title>
+  <style>
+    html,
+    body {
+      overscroll-behavior: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    #display {
+      font-size: 1.4em;
+      line-height: 3.2em;
+      font-family: 'Hiragino Mincho Pro', 'ヒラギノ明朝 Pro', 'Times New Roman', serif;
+      white-space: pre-wrap;
+      border: none;
+      padding: 1em 2em;
+      width: 70%;
+      margin: 2em auto;
+      min-height: 120px;
+      max-height: 80vh;
+      overflow-y: auto;
+      color: #111;
+      scroll-behavior: smooth;
+      overscroll-behavior: contain;
+    }
+
+    h1 {
+      font-family: 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W6', 'Yu Gothic', '游ゴシック', sans-serif;
+      font-size: 2.0em;
+      font-weight: bold;
+      color: #111;
+      text-align: left;
+      width: 70%;
+      margin: 1em auto 0 auto;
+      padding: 0 2em;
+    }
+  </style>
 </head>
+
 <body>
   <h1></h1>
   <div id="display"></div>
@@ -42,6 +52,14 @@
 
     const display = document.getElementById('display');
     const h1 = document.querySelector('h1');
+
+    let autoScroll = true; // 自動スクロールON/OFFフラグ
+
+    // スクロールイベントで自動追従の切り替え
+    display.addEventListener('scroll', () => {
+      const atBottom = display.scrollHeight - display.scrollTop <= display.clientHeight + 5;
+      autoScroll = atBottom; // 一番下ならON、それ以外はOFF
+    });
 
     async function fetchData() {
       try {
@@ -109,32 +127,35 @@
         display.textContent += char;
         index++;
 
-    // 自動スクロール
-    display.scrollTop = display.scrollHeight;
+        // 自動スクロール（フラグがtrueのときだけ）
+        if (autoScroll) {
+          display.scrollTop = display.scrollHeight;
+        }
 
-    let delay = 95; // 通常は50ms
+        let delay = 95;
 
-    if (char === '\n') {
-      delay = 800; // 改行
-    } else if (char === '。') {
-      delay = 1000; // 句点
-    } else if (char === '、') {
-      delay = 600; // 読点
-    } else if (char === '」') {
-      delay = 600; // 読点
-    } else if (char === '？') {
-      delay = 600; // 読点
-      } else if (char === '　') {
-      delay = 600; // 読点
-      } else if (char === ' ') {
-      delay = 600; // 読点
+        if (char === '\n') {
+          delay = 800; // 改行
+        } else if (char === '。') {
+          delay = 1000; // 句点
+        } else if (char === '、') {
+          delay = 600; // 読点
+        } else if (char === '」') {
+          delay = 600; // 読点
+        } else if (char === '？') {
+          delay = 600; // 読点
+        } else if (char === '　') {
+          delay = 600; // 読点
+        } else if (char === ' ') {
+          delay = 600; // 読点
+        }
+
+        setTimeout(showNextChar, delay);
+      }
     }
-
-    setTimeout(showNextChar, delay);
-  }
-}
 
     fetchData();
   </script>
 </body>
+
 </html>
