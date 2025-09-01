@@ -1,161 +1,142 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
-  <meta charset="UTF-8" />
-  <title>water_</title>
-  <style>
-    html,
-    body {
-      overscroll-behavior: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    #display {
-      font-size: 1.4em;
-      line-height: 3.2em;
-      font-family: 'Hiragino Mincho Pro', 'ヒラギノ明朝 Pro', 'Times New Roman', serif;
-      white-space: pre-wrap;
-      border: none;
-      padding: 1em 2em;
-      width: 70%;
-      margin: 2em auto;
-      min-height: 120px;
-      max-height: 80vh;
-      overflow-y: auto;
-      color: #111;
-      scroll-behavior: smooth;
-      overscroll-behavior: contain;
-    }
-
-    h1 {
-      font-family: 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W6', 'Yu Gothic', '游ゴシック', sans-serif;
-      font-size: 2.0em;
-      font-weight: bold;
-      color: #111;
-      text-align: left;
-      width: 70%;
-      margin: 1em auto 0 auto;
-      padding: 0 2em;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>water_</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Hiragino Mincho Pro', 'ヒラギノ明朝 Pro', 'Times New Roman', serif;
+  }
+  body {
+    background: #fff;
+    color: #111;
+  }
+  #title {
+    font-family: 'Hiragino Kaku Gothic ProN','ヒラギノ角ゴ ProN W6','Yu Gothic','游ゴシック',sans-serif;
+    font-size: 2em;
+    font-weight: bold;
+    text-align: left;
+    width: 70%;
+    margin: 1em auto 0 auto;
+    padding: 0 2em;
+  }
+  #display {
+    font-size: 1.4em;
+    line-height: 3.2em;
+    white-space: pre-wrap;
+    border: none;
+    padding: 1em 2em;
+    width: 70%;
+    margin: 2em auto;
+    min-height: 120px;
+    max-height: 80vh;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    overscroll-behavior: contain;
+  }
+  #inputArea {
+    width: 70%;
+    margin: 2em auto;
+    display: flex;
+    flex-direction: column;
+  }
+  textarea {
+    font-size: 1em;
+    line-height: 1.5em;
+    padding: 1em;
+    resize: vertical;
+    min-height: 100px;
+  }
+  button {
+    margin-top: 1em;
+    padding: 0.8em;
+    font-size: 1em;
+    cursor: pointer;
+  }
+</style>
 </head>
-
 <body>
-  <h1></h1>
-  <div id="display"></div>
 
-  <script>
-    const spreadsheetId = '1KFKX72CwcWavjCvGxCTt_XA3iQQAyz6a3Koc7qBQ5PQ';
-    const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json`;
+<div id="inputArea">
+  <input type="text" id="titleInput" placeholder="タイトルを入力">
+  <textarea id="textInput" placeholder="本文を入力"></textarea>
+  <button id="startBtn">表示開始</button>
+</div>
 
-    const display = document.getElementById('display');
-    const h1 = document.querySelector('h1');
+<h1 id="title"></h1>
+<div id="display"></div>
 
-    let autoScroll = true; // 自動スクロールON/OFFフラグ
+<script>
+  const titleElem = document.getElementById('title');
+  const display = document.getElementById('display');
+  const startBtn = document.getElementById('startBtn');
+  const titleInput = document.getElementById('titleInput');
+  const textInput = document.getElementById('textInput');
 
-    // スクロールイベントで自動追従の切り替え
-    display.addEventListener('scroll', () => {
-      const atBottom = display.scrollHeight - display.scrollTop <= display.clientHeight + 5;
-      autoScroll = atBottom; // 一番下ならON、それ以外はOFF
-    });
+  let autoScroll = true;
 
-    async function fetchData() {
-      try {
-        const res = await fetch(url);
-        const text = await res.text();
-        const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-        const data = JSON.parse(jsonText);
-        const rows = data.table.rows;
+  display.addEventListener('scroll', () => {
+    const atBottom = display.scrollHeight - display.scrollTop <= display.clientHeight + 5;
+    autoScroll = atBottom;
+  });
 
-        let fullText = '';
-        let latestTitle = '';
-
-        rows.forEach(row => {
-          if (row.c[0] && row.c[0].v) latestTitle = row.c[0].v; // 1列目をタイトルに
-          if (row.c[2] && row.c[2].v) fullText += row.c[2].v + '\n'; // 3列目を本文に
-        });
-
-        // ページアクセス後1秒待ってタイトル表示スタート
+  startBtn.addEventListener('click', () => {
+    const titleText = titleInput.value.trim();
+    const bodyText = textInput.value.trim();
+    if (!titleText && !bodyText) return;
+    document.getElementById('inputArea').style.display = 'none';
+    setTimeout(() => {
+      showTextOneByOneTitle(titleText, () => {
         setTimeout(() => {
-          showTextOneByOneTitle(latestTitle, () => {
-            // タイトル表示が終わったらさらに1秒待って本文表示
-            setTimeout(() => {
-              showTextOneByOne(fullText);
-            }, 1300);
-          });
-        }, 2200);
+          showTextOneByOne(bodyText);
+        }, 1000);
+      });
+    }, 1000);
+  });
 
-      } catch (e) {
-        display.textContent = 'データの取得に失敗しました。';
-        console.error(e);
-      }
-    }
-
-    // タイトル用一文字ずつ表示
-    function showTextOneByOneTitle(text, callback) {
-      let index = 0;
-      h1.textContent = '';
-
-      function showNextChar() {
-        if (index < text.length) {
-          h1.textContent += text.charAt(index);
-          index++;
-          setTimeout(showNextChar, 130);
-        } else if (callback) {
-          callback();
-        }
-      }
-      showNextChar();
-    }
-
-    // 本文用一文字ずつ表示
+  function showTextOneByOneTitle(text, callback) {
     let index = 0;
-    let currentText = '';
-
-    function showTextOneByOne(text) {
-      currentText = text;
-      index = 0;
-      display.textContent = '';
-      showNextChar();
-    }
-
-    function showNextChar() {
-      if (index < currentText.length) {
-        const char = currentText.charAt(index);
-        display.textContent += char;
+    titleElem.textContent = '';
+    function nextChar() {
+      if (index < text.length) {
+        titleElem.textContent += text.charAt(index);
         index++;
-
-        // 自動スクロール（フラグがtrueのときだけ）
-        if (autoScroll) {
-          display.scrollTop = display.scrollHeight;
-        }
-
-        let delay = 95;
-
-        if (char === '\n') {
-          delay = 800; // 改行のスクロールが落ち着くまで100ms追加
-        } else if (char === '。') {
-          delay = 800; // 句点
-        } else if (char === '、') {
-          delay = 500; // 読点
-        } else if (char === '」') {
-          delay = 400; // 読点
-        } else if (char === '？') {
-          delay = 600; // 読点
-        } else if (char === '　') {
-          delay = 600; // 読点
-        } else if (char === ' ') {
-          delay = 600; // 読点
-        }
-
-        setTimeout(showNextChar, delay);
+        setTimeout(nextChar, 130);
+      } else if (callback) {
+        callback();
       }
     }
+    nextChar();
+  }
 
-    fetchData();
-  </script>
+  let currentText = '';
+  let index = 0;
+
+  function showTextOneByOne(text) {
+    currentText = text;
+    index = 0;
+    display.textContent = '';
+    showNextChar();
+  }
+
+  function showNextChar() {
+    if (index < currentText.length) {
+      const char = currentText.charAt(index);
+      display.textContent += char;
+      index++;
+
+      if (autoScroll) display.scrollTop = display.scrollHeight;
+
+      let delay = 95;
+      if (char === '\n') delay = 800;
+      else if (char === '。') delay = 1000;
+      else if (char === '、' || char === '」' || char === '？' || char === '　' || char === ' ') delay = 600;
+
+      setTimeout(showNextChar, delay);
+    }
+  }
+</script>
 </body>
-
 </html>
