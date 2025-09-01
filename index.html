@@ -130,9 +130,21 @@
       if (autoScroll) display.scrollTop = display.scrollHeight;
 
       let delay = 95;
-      if (char === '\n') delay = 800;
-      else if (char === '。') delay = 1000;
-      else if (char === '、' || char === '」' || char === '？' || char === '　' || char === ' ') delay = 600;
+        if (char === '\n') {
+          delay = 800; // 改行のスクロールが落ち着くまで100ms追加
+        } else if (char === '。') {
+          delay = 800; // 句点
+        } else if (char === '、') {
+          delay = 500; // 読点
+        } else if (char === '」') {
+          delay = 400; // 読点
+        } else if (char === '？') {
+          delay = 600; // 読点
+        } else if (char === '　') {
+          delay = 600; // 読点
+        } else if (char === ' ') {
+          delay = 600; // 読点
+        }
 
       setTimeout(showNextChar, delay);
     }
