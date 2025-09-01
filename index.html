@@ -68,7 +68,7 @@ h1 {
         // ここで2秒待ってから表示開始
     setTimeout(() => {
       showTextOneByOne(fullText);
-    }, 2000); // 2000ms = 2秒
+    }, 1000); // 2000ms = 2秒
 
   } catch (e) {
     display.textContent = 'データの取得に失敗しました。';
@@ -107,6 +107,10 @@ function showNextChar() {
       delay = 600; // 読点
     } else if (char === '？') {
       delay = 600; // 読点
+      } else if (char === '　') {
+      delay = 600; // 読点
+      } else if (char === ' ') {
+      delay = 600; // 読点
     }
 
     setTimeout(showNextChar, delay);
@@ -118,4 +122,3 @@ function showNextChar() {
   </script>
 </body>
 </html>
-
