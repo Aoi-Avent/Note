@@ -65,11 +65,14 @@ h1 {
           }
         });
 
-        showTextOneByOne(fullText);
+        // ここで2秒待ってから表示開始
+    setTimeout(() => {
+      showTextOneByOne(fullText);
+    }, 1000); // 2000ms = 2秒
 
-      } catch (e) {
-        display.textContent = 'データの取得に失敗しました。';
-        console.error(e);
+  } catch (e) {
+    display.textContent = 'データの取得に失敗しました。';
+    console.error(e);
       }
     }
 
@@ -115,3 +118,4 @@ function showNextChar() {
   </script>
 </body>
 </html>
+
